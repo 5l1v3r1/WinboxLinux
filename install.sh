@@ -9,6 +9,7 @@ then
     exit 1
 fi
 
+create_shortcut(){
 if [[ ! -f winbox.desktop ]]
 then
 cat << EOF > winbox.desktop
@@ -22,27 +23,7 @@ Icon=$winboxpath/winbox.png
 Comment=Mikrotik RouterOS GUI Configurator (wine)
 EOF
 fi
-
-echo "Select Installer Mode"
-echo "1 ) User Installer"
-echo "2 ) System Installer"
-echo -p "User / System (U/S) ?" installopt;
-if [[ $installopt == "u" || $installopt == "U" ]]
-then
-    installpath="~/app"
-    launcher="~/.local/share/applications/winbox.desktop"
-    download_winbox
-    user_installer
-elif [[ $installopt == "s" || $installopt == "S" ]]
-    installpath="/opt"
-    launcher="/usr/share/applications/winbox.desktop"
-    download_winbox
-    system_installer
-fi
-
-echo "Winbox is finished installing in the $winboxpath"
-echo "Winbox Launcher is finished installing in the $launcher"
-echo "Now you can launch Winbox by select Winbox icon from Launcher"
+}
 
 download_winbox(){
     if [[ $(uname -a | grep -o "x86_64") ]]
@@ -51,7 +32,7 @@ download_winbox(){
     fi
     if [[ ! -f $file ]]
     then
-        echo "Downloading $file"
+        echo "Downloading $file..."
         wget -q -c -O $file $url
     else
         echo "$file Already Downloaded"
@@ -61,9 +42,10 @@ download_winbox(){
     then
         mkdir winbox
     fi
+    create_shortcut
     cp winbox.png winbox/
     cp winbox.exe winbox/
-    echo "Installing Winbox"
+    echo "Installing Winbox..."
 }
 
 user_installer(){
@@ -86,3 +68,26 @@ system_installer(){
         sudo mv winbox.desktop $launcher
     fi
 }
+
+echo "Select Installer Mode"
+echo "1 ) User Installer"
+echo "2 ) System Installer"
+echo -n "User / System (U/S) ? "
+read installopt
+if [[ $installopt == "u" || $installopt == "U" ]]
+then
+    installpath="~/app"
+    launcher="~/.local/share/applications/winbox.desktop"
+    download_winbox
+    user_installer
+elif [[ $installopt == "s" || $installopt == "S" ]]
+then
+    installpath="/opt"
+    launcher="/usr/share/applications/winbox.desktop"
+    download_winbox
+    system_installer
+fi
+
+echo "Winbox is finished installing in the $winboxpath"
+echo "Winbox Launcher is finished installing in the $launcher"
+echo "Now you can launch Winbox by select Winbox icon from Launcher"
